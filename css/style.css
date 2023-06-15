@@ -1,0 +1,14 @@
+body{
+    width: 1200px;
+    /* body全体を真ん中に */
+    margin:auto
+}
+
+#output{
+    height: 300px;
+    overflow: scroll;
+}
+
+.tweet{
+    padding: 10px 0;
+}
