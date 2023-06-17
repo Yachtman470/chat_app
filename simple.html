@@ -8,24 +8,27 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
+<!-- <body onload="LoadProc()"> -->
+
 <body>
-
     <!-- コンテンツ表示画面 -->
-
     <div>
+        <h1>Cheese Talk</h1>
+        <div id="output"></div>
+        <ul id="img-list">
+            <li class="imgs" data-img="1"><img src="imgs/buke.png" width="100"></li>
+            <li class="imgs" data-img="2"><img src="imgs/tuku.jpg" width="100"></li>
+            <li class="imgs" data-img="3"><img src="imgs/caram.png" width="100"></li>
+        </ul>
         <div>
-            名前: <input type="text" id="uname">
+            名前: <input type="text" id="uname" value="名無し">
         </div>
         <div>
             <textarea name="" id="text" cols="30" rows="10"></textarea>
             <button id="send">送信</button>
         </div>
-        <div id="output"></div>
     </div>
-
     <!--/ コンテンツ表示画面 -->
-
-
 
     <!-- JQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -59,11 +62,28 @@
         const db = getDatabase(app); // RealtimeDBに接続
         const dbRef = ref(db, "chat"); // RealtimeDB内の"chat"を使う
 
+        // アイコン処理
+        let d = 0;
+        const img = ["anonymous.jpg", "buke.png", "tuku.jpg", "caram.png"];
+        $(".imgs").on("click", function () {
+            d = $(this).attr("data-img");
+        });
+
+        // 時刻を取得するための変数
+        var now = new Date();
+
         // 送信ボタンが押されたら、データをDBに送信
         $("#send").on("click", function () {
+            var month = now.getMonth();
+            var date = now.getDate();
+            var hour = ('0' + now.getHours()).slice(-2);
+            var min = ('0' + now.getMinutes()).slice(-2);
+
             const msg = {
                 uname: $("#uname").val(),
-                text: $("#text").val()
+                text: $("#text").val(),
+                icon: d,
+                time: "(" + month + "/" + date + " " + hour + ":" + min + ")"
             }
             const newPostRef = push(dbRef); // pushできる状態にする
             set(newPostRef, msg); // DBに値を送信
@@ -72,9 +92,16 @@
         // Enterが押されたら、データをDBに送信
         $("#text").on("keydown", function (e) {
             if (e.keyCode == 13) {
+                var month = now.getMonth();
+                var date = now.getDate();
+                var hour = ('0' + now.getHours()).slice(-2);
+                var min = ('0' + now.getMinutes()).slice(-2);
+
                 const msg = {
                     uname: $("#uname").val(),
-                    text: $("#text").val()
+                    text: $("#text").val(),
+                    icon: d,
+                    time: "(" + month + "/" + date + " " + hour + ":" + min + ")"
                 }
                 const newPostRef = push(dbRef); // pushできる状態にする
                 set(newPostRef, msg); // DBに値を送信
@@ -85,9 +112,14 @@
         onChildAdded(dbRef, function (data) {
             const msg = data.val();
             const key = data.key;
-            const h = `<p id="${key}" class="message">${msg.uname}: ${msg.text}<button class="remove">削除</button><button class = "like">いいね！</button></p>`;
+            // const h = `<p id="${key}" class="message">${msg.uname} : <br><img src="imgs/${img[msg.icon]}" width="50"> ${msg.text}<br><button class="remove">削除</button><button class = "like">いいね！</button> ${msg.time}</p>`;
+            const h = `<div class="message" id="${key}"><div>${msg.uname}</div>
+            <div class="balloon_l"><div class="faceicon"><img src="imgs/${img[msg.icon]}"></div><p class="says">${msg.text}</p></div>
+            <button class="remove">削除</button><button class = "like">いいね 0</button> ${msg.time}</div>`
+            // const h = `<div class="message" id="${key}"><div>${msg.uname}</div>
+            // <div class="balloon_l"><div class="faceicon"><img src="imgs/${img[msg.icon]}"></div><p class="says">${msg.text}</p></div>
+            // <button class="remove">削除</button><input type="button" value="いいね 0" onClick="count();"> ${msg.time}</div>`
             $('#output').append(h);
-            // $("#output").append(`<div id="${key}"><div><p>${msg.uname}: ${msg.text}</p><button class="remove">削除</button></div><div><button class = "like">いいね！</button></div></div>`); // #output の最後に追加
         });
 
         // 削除ボタンを押したときの処理
@@ -106,60 +138,14 @@
             comment.remove();
         });
 
-
-
-
-
-
-
-
-
-
-
-        // 削除ボタンが押されたら、対象チャットを削除
-        // 削除ボタンのクリックイベントを処理
-        // $(".delete-button").on("click", function () {
-        // var messageId = $(this).data("message-id");
-        // console.log("aaa");
-        // var d = $(this).closest(".message");
-
-        // // Firestoreのメッセージドキュメントを削除
-        // db.collection("messages").doc(messageId).delete()
-        //     .then(function () {
-        //         console.log("メッセージの削除に成功しました。");
-        //     })
-        //     .catch(function (error) {
-        //         console.error("メッセージの削除に失敗しました。", error);
-        //     });
-        // });
-
-        // 既存アイテムのリストを取得した後、アイテムリストからの削除がある度に発火する
-        // onChildRemoved(dbRef, function (snapshot) {
-        //     const msg = data.val();
-        //     const key = data.key;
-        //     let h = "<p class='tweet'>";
-        //     h += msg.uname;
-        //     h += "<br>";
-        //     h += msg.text;
-        //     h += "<br><button class='delete-button'>削除</button>"
-        //     h += "</p>";
-        //     $("#output").append(h); // #output の最後に追加
-        // });
-
-
-
+        // いいねボタンを押したときの処理
+        $("#output").on("click", ".like", function () {
+            var thisCount = $(this).html();
+            thisCount = Number(thisCount.slice(4));
+            thisCount = thisCount + 1;
+            $(this).html("いいね " + thisCount);
+        });
     </script>
-
-
-
-
-
-
-
-
-
-
-
 </body>
 
 </html>
