@@ -85,41 +85,26 @@
         onChildAdded(dbRef, function (data) {
             const msg = data.val();
             const key = data.key;
-            // let h = "<p class='message'>";
-            // h += msg.uname;
-            // h += "<br>";
-            // h += msg.text;
-            // h += "<br><button class='delete-button'>削除</button>"
-            // h += "</p>";
-            $("#output").append(`<div id="${key}"><div><p>${msg.uname}:${msg.text}</p><button class="remove">削除</button></div><div><button class = "like">いいね！</button></div></div>`); // #output の最後に追加
-            // console.log(h);
-            // 削除ボタンを押したときの処理
-            // 削除ボタンと一緒に表示されているメッセージを削除する
-            //削除ボタンと一緒にいいねボタンといいね数を削除する
-
-
+            const h = `<p id="${key}" class="message">${msg.uname}: ${msg.text}<button class="remove">削除</button><button class = "like">いいね！</button></p>`;
+            $('#output').append(h);
+            // $("#output").append(`<div id="${key}"><div><p>${msg.uname}: ${msg.text}</p><button class="remove">削除</button></div><div><button class = "like">いいね！</button></div></div>`); // #output の最後に追加
         });
 
-        $(".remove").on("click", function () {
-            console.log("aaa");
-            const id = $(this).parent().parent().attr("id");
+        // 削除ボタンを押したときの処理
+        $("#output").on("click", ".remove", function () {
+            const id = $(this).parent().attr("id");
             const comment = document.getElementById(id);
-            console.log(id);
-            comment.remove();
             //データベースからも削除する
             remove(ref(db, "chat/" + id));
         });
 
-        // function onDeleteButtonClick(key) {
-        //     localStorage.removeItem(key);
-        //     refreshList();
-        // }
-
-
-
-        // $(".remove").on("click", function () {
-        //     console.log("aaa");
-        // })
+        // アイテムリストからの削除ある度に発火する
+        onChildRemoved(dbRef, function (data) {
+            const key = data.key;
+            const comment = document.getElementById(key);
+            // 削除ボタンと一緒に表示されているメッセージを削除する
+            comment.remove();
+        });
 
 
 
