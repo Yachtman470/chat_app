@@ -42,12 +42,15 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
         // TODO: Add SDKs for Firebase products that you want to use
         // https://firebase.google.com/docs/web/setup#available-libraries
-        import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved }
+        import { getDatabase, ref, onValue, onChildChanged, push, set, onChildAdded, remove, onChildRemoved }
             from "https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-database.js";
+
+        // いいね数管理のため、firebaseをインポート
+        // import firebase from "firebase/app";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyCsOSw3tK4jdS8FWXposTERyYX7A0VM5-c",
+            apiKey: "",
             authDomain: "fir-demo-1bc12.firebaseapp.com",
             projectId: "fir-demo-1bc12",
             storageBucket: "fir-demo-1bc12.appspot.com",
@@ -83,6 +86,7 @@
                 uname: $("#uname").val(),
                 text: $("#text").val(),
                 icon: d,
+                likes: 0,
                 time: "(" + month + "/" + date + " " + hour + ":" + min + ")"
             }
             const newPostRef = push(dbRef); // pushできる状態にする
@@ -101,6 +105,7 @@
                     uname: $("#uname").val(),
                     text: $("#text").val(),
                     icon: d,
+                    likes: 0,
                     time: "(" + month + "/" + date + " " + hour + ":" + min + ")"
                 }
                 const newPostRef = push(dbRef); // pushできる状態にする
@@ -115,7 +120,7 @@
             // const h = `<p id="${key}" class="message">${msg.uname} : <br><img src="imgs/${img[msg.icon]}" width="50"> ${msg.text}<br><button class="remove">削除</button><button class = "like">いいね！</button> ${msg.time}</p>`;
             const h = `<div class="message" id="${key}"><div>${msg.uname}</div>
             <div class="balloon_l"><div class="faceicon"><img src="imgs/${img[msg.icon]}"></div><p class="says">${msg.text}</p></div>
-            <button class="remove">削除</button><button class = "like">いいね 0</button> ${msg.time}</div>`
+            <button class="remove">削除</button><button class = "like">いいね ${msg.likes}</button> ${msg.time}</div>`
             // const h = `<div class="message" id="${key}"><div>${msg.uname}</div>
             // <div class="balloon_l"><div class="faceicon"><img src="imgs/${img[msg.icon]}"></div><p class="says">${msg.text}</p></div>
             // <button class="remove">削除</button><input type="button" value="いいね 0" onClick="count();"> ${msg.time}</div>`
@@ -125,8 +130,7 @@
         // 削除ボタンを押したときの処理
         $("#output").on("click", ".remove", function () {
             const id = $(this).parent().attr("id");
-            const comment = document.getElementById(id);
-            //データベースからも削除する
+            //データベースから削除する
             remove(ref(db, "chat/" + id));
         });
 
@@ -134,17 +138,38 @@
         onChildRemoved(dbRef, function (data) {
             const key = data.key;
             const comment = document.getElementById(key);
-            // 削除ボタンと一緒に表示されているメッセージを削除する
+            // Webページからメッセージを削除する
             comment.remove();
         });
 
-        // いいねボタンを押したときの処理
+        // いいねボタンを押したらfirebaseのlikesを1増やす
         $("#output").on("click", ".like", function () {
-            var thisCount = $(this).html();
-            thisCount = Number(thisCount.slice(4));
-            thisCount = thisCount + 1;
-            $(this).html("いいね " + thisCount);
-        });
+            const id = $(this).parent().attr("id");
+            const chatRef = ref(db, 'chat/' + id);
+            onValue(chatRef, (snapshot) => {
+                var tmp = snapshot.val().likes + 1;
+                console.log(tmp);
+                set(ref(db, 'chat/' + id), {
+                    uname: snapshot.val().uname,
+                    text: snapshot.val().text,
+                    icon: snapshot.val().icon,
+                    likes: tmp,
+                    time: snapshot.val().time
+                });
+            }, {
+                onlyOnce: true
+            });
+        })
+
+        onChildChanged(dbRef, function (data) {
+            const key = data.key;
+            const comment = document.getElementById(key);
+            console.log(comment);
+            const child = comment.querySelectorAll('.message .like')[0];
+            var thisCount = Number(child.textContent.slice(4));
+            thisCount += 1;
+            child.textContent = "いいね " + thisCount
+        })
     </script>
 </body>
 

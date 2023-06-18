@@ -11,6 +11,7 @@ h1 {
 
 #output {
     height: 500px;
+    width: 800px;
     overflow: scroll;
     padding: 20px;
     border: solid 5px #024716;
