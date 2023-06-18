@@ -50,7 +50,7 @@
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "",
+            apiKey: "AIzaSyCsOSw3tK4jdS8FWXposTERyYX7A0VM5-c",
             authDomain: "fir-demo-1bc12.firebaseapp.com",
             projectId: "fir-demo-1bc12",
             storageBucket: "fir-demo-1bc12.appspot.com",
@@ -148,7 +148,6 @@
             const chatRef = ref(db, 'chat/' + id);
             onValue(chatRef, (snapshot) => {
                 var tmp = snapshot.val().likes + 1;
-                console.log(tmp);
                 set(ref(db, 'chat/' + id), {
                     uname: snapshot.val().uname,
                     text: snapshot.val().text,
@@ -164,7 +163,6 @@
         onChildChanged(dbRef, function (data) {
             const key = data.key;
             const comment = document.getElementById(key);
-            console.log(comment);
             const child = comment.querySelectorAll('.message .like')[0];
             var thisCount = Number(child.textContent.slice(4));
             thisCount += 1;
