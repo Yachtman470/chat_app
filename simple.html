@@ -50,7 +50,7 @@
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyCsOSw3tK4jdS8FWXposTERyYX7A0VM5-c",
+            apiKey: "",
             authDomain: "fir-demo-1bc12.firebaseapp.com",
             projectId: "fir-demo-1bc12",
             storageBucket: "fir-demo-1bc12.appspot.com",
@@ -72,11 +72,10 @@
             d = $(this).attr("data-img");
         });
 
-        // 時刻を取得するための変数
-        var now = new Date();
-
         // 送信ボタンが押されたら、データをDBに送信
         $("#send").on("click", function () {
+            // 時刻を取得するための変数
+            var now = new Date();
             var month = now.getMonth();
             var date = now.getDate();
             var hour = ('0' + now.getHours()).slice(-2);
@@ -96,6 +95,8 @@
         // Enterが押されたら、データをDBに送信
         $("#text").on("keydown", function (e) {
             if (e.keyCode == 13) {
+                // 時刻を取得するための変数
+                var now = new Date();
                 var month = now.getMonth();
                 var date = now.getDate();
                 var hour = ('0' + now.getHours()).slice(-2);
